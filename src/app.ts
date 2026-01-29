@@ -6,6 +6,8 @@ import rateLimit from 'express-rate-limit';
 import * as dotenv from 'dotenv';
 import { AppError, NotFoundError } from '@errors/app.error';
 import adminRoutes from '@src/routes/admin.routes';
+import authRoutes from '@src/routes/auth.routes';
+import usersRoutes from '@src/routes/users.routes';
 // import v1Routes from '@routes/v1.routes';
 // import adminRoutes from '@routes/admin.routes';
 // import webhookRoutes from '@routes/webhook.routes';
@@ -39,6 +41,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 // app.use('/v1', v1Routes);
 app.use('/admin', adminRoutes);
+app.use('/auth', authRoutes);
+app.use('/users', usersRoutes);
 // app.use('/webhook', webhookRoutes);
 
 // Health check route
