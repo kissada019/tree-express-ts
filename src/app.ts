@@ -4,9 +4,12 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import * as dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import { AppError, NotFoundError } from '@errors/app.error';
 import adminRoutes from '@src/routes/admin.routes';
 import authRoutes from '@src/routes/auth.routes';
+import treesRoutes from '@src/routes/trees.routes';
 import usersRoutes from '@src/routes/users.routes';
 // import v1Routes from '@routes/v1.routes';
 // import adminRoutes from '@routes/admin.routes';
@@ -38,10 +41,17 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
+
 // Routes
 // app.use('/v1', v1Routes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
+app.use('/trees', treesRoutes);
 app.use('/users', usersRoutes);
 // app.use('/webhook', webhookRoutes);
 
