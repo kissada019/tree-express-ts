@@ -15,6 +15,7 @@ export interface TreeRecord {
   sell_price: string;
   quantity: number;
   image_url: string | null;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -26,6 +27,7 @@ export interface CreateTreeInput {
   sell_price: number | string;
   quantity?: number;
   image_url?: string | null;
+  status?: string;
 }
 
 export interface UpdateTreeInput {
@@ -35,6 +37,7 @@ export interface UpdateTreeInput {
   sell_price?: number | string;
   quantity?: number;
   image_url?: string | null;
+  status?: string;
 }
 
 export class TreesRepository {
@@ -48,8 +51,9 @@ export class TreesRepository {
         buy_price,
         sell_price,
         quantity,
-        image_url
-      ) VALUES ($1, $2, $3, $4, $5, $6)
+        image_url,
+        status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
     const params = [
@@ -59,6 +63,7 @@ export class TreesRepository {
       input.sell_price,
       input.quantity ?? 0,
       input.image_url ?? null,
+      input.status ?? 'active',
     ];
     const result = await this.db.query<TreeRecord>(query, params);
     const tree = result.rows[0];
@@ -70,15 +75,16 @@ export class TreesRepository {
 
   async findById(id: string): Promise<TreeRecord | null> {
     const result = await this.db.query<TreeRecord>(
-      'SELECT * FROM trees WHERE id = $1',
-      [id]
+      'SELECT * FROM trees WHERE id = $1 and status = $2',
+      [id, 'active']
     );
     return result.rows[0] ?? null;
   }
 
   async findAll(): Promise<TreeRecord[]> {
     const result = await this.db.query<TreeRecord>(
-      'SELECT * FROM trees ORDER BY created_at DESC'
+      'SELECT * FROM trees WHERE status = $1 ORDER BY created_at DESC',
+      ['active']
     );
     return result.rows;
   }
@@ -102,6 +108,7 @@ export class TreesRepository {
     addField('sell_price', input.sell_price);
     addField('quantity', input.quantity);
     addField('image_url', input.image_url ?? undefined);
+    addField('status', input.status);
 
     if (fields.length === 0) {
       return this.findById(id);

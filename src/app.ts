@@ -9,6 +9,8 @@ import path from 'path';
 import { AppError, NotFoundError } from '@errors/app.error';
 import adminRoutes from '@src/routes/admin.routes';
 import authRoutes from '@src/routes/auth.routes';
+import cartRoutes from '@src/routes/cart.routes';
+import ordersRoutes from '@src/routes/orders.routes';
 import treesRoutes from '@src/routes/trees.routes';
 import usersRoutes from '@src/routes/users.routes';
 // import v1Routes from '@routes/v1.routes';
@@ -26,6 +28,8 @@ app.use(helmet({
     } : {})
 }));
 
+app.set('trust proxy', 1);
+
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100
@@ -33,7 +37,7 @@ app.use(rateLimit({
 
 app.use(cors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true
 }));
 
@@ -51,6 +55,8 @@ app.use('/uploads', express.static(uploadsDir));
 // app.use('/v1', v1Routes);
 app.use('/admin', adminRoutes);
 app.use('/auth', authRoutes);
+app.use('/cart', cartRoutes);
+app.use('/orders', ordersRoutes);
 app.use('/trees', treesRoutes);
 app.use('/users', usersRoutes);
 // app.use('/webhook', webhookRoutes);

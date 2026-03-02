@@ -18,6 +18,7 @@ const normalizeTreePayload = (body: Record<string, unknown>) => {
     sell_price: body.sell_price ?? body.sellPrice,
     quantity: body.quantity ?? body.qty,
     image_url: body.image_url ?? body.imageUrl,
+    status: body.status,
   };
 };
 
