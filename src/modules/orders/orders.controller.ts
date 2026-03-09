@@ -81,6 +81,10 @@ export const createDirectOrderController = async (
       next(new NotFoundError(error.message));
       return;
     }
+    if (error instanceof Error && error.message.startsWith('Insufficient quantity')) {
+      next(new BadRequestError(error.message));
+      return;
+    }
     next(error);
   }
 };
