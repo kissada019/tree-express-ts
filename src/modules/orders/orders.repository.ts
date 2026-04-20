@@ -6,6 +6,7 @@ export interface OrderRecord {
   total_price: string;
   final_total: string;
   discount_amount: string;
+  payment_method: string;
   status: string;
   note: string | null;
   created_at: string;
@@ -43,6 +44,7 @@ export class OrdersRepository {
     totalPrice: number,
     discountAmount: number,
     finalTotal: number,
+    paymentMethod: string,
     note?: string,
   ): Promise<OrderWithItems> {
     const orderResult = await this.db.query<OrderRecord>(
@@ -52,13 +54,14 @@ export class OrdersRepository {
         total_price,
         final_total,
         discount_amount,
+        payment_method,
         status,
         note
       )
-      VALUES ($1, $2, $3, $4, 'completed', $5)
+      VALUES ($1, $2, $3, $4, $5, 'completed', $6)
       RETURNING *
       `,
-      [userId, totalPrice, finalTotal, discountAmount, note ?? null],
+      [userId, totalPrice, finalTotal, discountAmount, paymentMethod, note ?? null],
     );
 
     const order = orderResult.rows[0];

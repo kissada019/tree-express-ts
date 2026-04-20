@@ -19,6 +19,7 @@ export class OrdersService {
     totalPrice: number,
     discountAmount: number,
     finalTotal: number,
+    paymentMethod: string,
     note?: string
   ): Promise<OrderWithItems> {
     const orderItems: CreateOrderItemInput[] = [];
@@ -51,6 +52,7 @@ export class OrdersService {
       totalPrice,
       discountAmount,
       finalTotal,
+      paymentMethod,
       note
     );
 

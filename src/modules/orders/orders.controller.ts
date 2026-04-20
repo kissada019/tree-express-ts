@@ -25,6 +25,7 @@ export const createDirectOrderController = async (
       discount_amount,
       final_total,
       final__total,
+      payment_method,
     } = req.body as {
       items?: { tree_id: string; quantity: number }[];
       note?: string;
@@ -32,6 +33,7 @@ export const createDirectOrderController = async (
       discount_amount?: number;
       final_total?: number;
       final__total?: number;
+      payment_method?: string;
     };
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -66,6 +68,10 @@ export const createDirectOrderController = async (
       next(new BadRequestError('final_total must be a number >= 0'));
       return;
     }
+    if (typeof payment_method !== 'string' || payment_method.trim().length === 0) {
+      next(new BadRequestError('payment_method is required'));
+      return;
+    }
 
     const order = await ordersService.createDirectOrder(
       userId,
@@ -73,6 +79,7 @@ export const createDirectOrderController = async (
       totalPrice,
       discountAmount,
       finalTotal,
+      payment_method.trim(),
       note
     );
     res.status(201).json(order);
@@ -129,6 +136,36 @@ export const getOrderByIdController = async (
     }
 
     res.status(200).json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /orders/items - ดึงรายการ order_items จาก query order_id
+export const getOrderItemsByPayloadController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const order_id =
+      typeof req.query.order_id === 'string' ? req.query.order_id : undefined;
+
+    if (!order_id || !UUID_REGEX.test(order_id)) {
+      next(new BadRequestError('Invalid order_id'));
+      return;
+    }
+
+    const order = await ordersService.getOrderById(order_id);
+    if (!order) {
+      next(new NotFoundError('Order not found'));
+      return;
+    }
+
+    res.status(200).json({
+      order_id: order.id,
+      items: order.items,
+    });
   } catch (error) {
     next(error);
   }
