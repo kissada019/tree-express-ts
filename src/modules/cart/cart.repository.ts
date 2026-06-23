@@ -13,6 +13,7 @@ export interface CartItemWithTree extends CartItemRecord {
   tree_name: string;
   species: string;
   sell_price: string;
+  stock: number;
   image_url: string | null;
   status: string;
 }
@@ -53,6 +54,7 @@ export class CartRepository {
         t.name AS tree_name,
         t.species,
         t.sell_price,
+        t.quantity AS stock,
         t.image_url,
         t.status
       FROM cart_items ci

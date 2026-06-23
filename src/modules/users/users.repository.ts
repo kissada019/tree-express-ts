@@ -14,6 +14,12 @@ export interface UserRecord {
   password_hash: string;
   first_name: string | null;
   last_name: string | null;
+  phone: string | null;
+  address: string | null;
+  subdistrict: string | null;
+  district: string | null;
+  province: string | null;
+  postal_code: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -29,6 +35,12 @@ export interface CreateUserInput {
   password_hash: string;
   first_name?: string | null;
   last_name?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  subdistrict?: string | null;
+  district?: string | null;
+  province?: string | null;
+  postal_code?: string | null;
   is_active?: boolean;
 }
 
@@ -38,6 +50,12 @@ export interface UpdateUserInput {
   password_hash?: string;
   first_name?: string | null;
   last_name?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  subdistrict?: string | null;
+  district?: string | null;
+  province?: string | null;
+  postal_code?: string | null;
   is_active?: boolean;
 }
 
@@ -52,8 +70,14 @@ export class UsersRepository {
         password_hash,
         first_name,
         last_name,
+        phone,
+        address,
+        subdistrict,
+        district,
+        province,
+        postal_code,
         is_active
-      ) VALUES ($1, $2, $3, $4, $5, $6)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
     `;
     const params = [
@@ -62,6 +86,12 @@ export class UsersRepository {
       input.password_hash,
       input.first_name ?? null,
       input.last_name ?? null,
+      input.phone ?? null,
+      input.address ?? null,
+      input.subdistrict ?? null,
+      input.district ?? null,
+      input.province ?? null,
+      input.postal_code ?? null,
       input.is_active ?? true,
     ];
     const result = await this.db.query<UserRecord>(query, params);
@@ -135,6 +165,12 @@ export class UsersRepository {
     addField('password_hash', input.password_hash);
     addField('first_name', input.first_name ?? undefined);
     addField('last_name', input.last_name ?? undefined);
+    addField('phone', input.phone ?? undefined);
+    addField('address', input.address ?? undefined);
+    addField('subdistrict', input.subdistrict ?? undefined);
+    addField('district', input.district ?? undefined);
+    addField('province', input.province ?? undefined);
+    addField('postal_code', input.postal_code ?? undefined);
     addField('is_active', input.is_active);
 
     if (fields.length === 0) {

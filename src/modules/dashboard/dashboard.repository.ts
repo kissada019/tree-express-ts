@@ -7,6 +7,7 @@ export interface SoldOrderSummary {
   discount_amount: string;
   final_total: string;
   payment_method: string;
+  sales_channel: string;
   status: string;
   created_at: string;
 }
@@ -121,6 +122,7 @@ export class DashboardRepository {
         discount_amount::text,
         final_total::text,
         payment_method,
+        sales_channel,
         status,
         created_at::text
       FROM orders

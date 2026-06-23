@@ -7,6 +7,11 @@ export interface OrderRecord {
   final_total: string;
   discount_amount: string;
   payment_method: string;
+  sales_channel: string;
+  fulfillment_method: string;
+  pickup_date: string | null;
+  pickup_time: string | null;
+  payment_slip_url: string | null;
   status: string;
   note: string | null;
   created_at: string;
@@ -28,6 +33,13 @@ export interface OrderWithItems extends OrderRecord {
   items: OrderItemRecord[];
 }
 
+export type OrderStatus =
+  | 'pending_payment'
+  | 'payment_review'
+  | 'ready_to_ship'
+  | 'completed'
+  | 'cancelled';
+
 export interface CreateOrderItemInput {
   tree_id: string;
   tree_name: string;
@@ -45,6 +57,11 @@ export class OrdersRepository {
     discountAmount: number,
     finalTotal: number,
     paymentMethod: string,
+    salesChannel: string,
+    fulfillmentMethod: string,
+    pickupDate: string | null,
+    pickupTime: string | null,
+    status: OrderStatus,
     note?: string,
   ): Promise<OrderWithItems> {
     const orderResult = await this.db.query<OrderRecord>(
@@ -55,13 +72,29 @@ export class OrdersRepository {
         final_total,
         discount_amount,
         payment_method,
+        sales_channel,
+        fulfillment_method,
+        pickup_date,
+        pickup_time,
         status,
         note
       )
-      VALUES ($1, $2, $3, $4, $5, 'completed', $6)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
       `,
-      [userId, totalPrice, finalTotal, discountAmount, paymentMethod, note ?? null],
+      [
+        userId,
+        totalPrice,
+        finalTotal,
+        discountAmount,
+        paymentMethod,
+        salesChannel,
+        fulfillmentMethod,
+        pickupDate,
+        pickupTime,
+        status,
+        note ?? null,
+      ],
     );
 
     const order = orderResult.rows[0];
@@ -104,6 +137,11 @@ export class OrdersRepository {
     return result.rows;
   }
 
+  async findOrdersWithItemsByUserId(userId: string): Promise<OrderWithItems[]> {
+    const orders = await this.findOrdersByUserId(userId);
+    return this.attachItems(orders);
+  }
+
   async findOrderById(orderId: string): Promise<OrderWithItems | null> {
     const orderResult = await this.db.query<OrderRecord>(
       "SELECT * FROM orders WHERE id = $1",
@@ -128,5 +166,74 @@ export class OrdersRepository {
       "SELECT * FROM orders ORDER BY created_at DESC",
     );
     return result.rows;
+  }
+
+  async findAllOrdersWithItems(): Promise<OrderWithItems[]> {
+    const orders = await this.findAllOrders();
+    return this.attachItems(orders);
+  }
+
+  async updateStatus(orderId: string, status: OrderStatus): Promise<OrderRecord | null> {
+    const result = await this.db.query<OrderRecord>(
+      `
+      UPDATE orders
+      SET status = $2,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING *
+      `,
+      [orderId, status],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async updatePaymentSlip(
+    orderId: string,
+    userId: string,
+    paymentSlipUrl: string,
+  ): Promise<OrderRecord | null> {
+    const result = await this.db.query<OrderRecord>(
+      `
+      UPDATE orders
+      SET payment_slip_url = $3,
+          status = 'payment_review',
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+        AND user_id = $2
+        AND sales_channel = 'online'
+      RETURNING *
+      `,
+      [orderId, userId, paymentSlipUrl],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  private async attachItems(orders: OrderRecord[]): Promise<OrderWithItems[]> {
+    if (orders.length === 0) {
+      return [];
+    }
+
+    const orderIds = orders.map((order) => order.id);
+    const itemsResult = await this.db.query<OrderItemRecord>(
+      `
+      SELECT *
+      FROM order_items
+      WHERE order_id = ANY($1::uuid[])
+      ORDER BY created_at
+      `,
+      [orderIds],
+    );
+
+    const itemsByOrderId = new Map<string, OrderItemRecord[]>();
+    for (const item of itemsResult.rows) {
+      const items = itemsByOrderId.get(item.order_id) ?? [];
+      items.push(item);
+      itemsByOrderId.set(item.order_id, items);
+    }
+
+    return orders.map((order) => ({
+      ...order,
+      items: itemsByOrderId.get(order.id) ?? [],
+    }));
   }
 }

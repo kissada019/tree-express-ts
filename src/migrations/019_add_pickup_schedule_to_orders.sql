@@ -1,0 +1,4 @@
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS pickup_date DATE,
+ADD COLUMN IF NOT EXISTS pickup_time TIME;
+

@@ -12,8 +12,12 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) { }
 
   async createUser(params: CreateUserInput): Promise<UserRecord> {
+    return this.createUserWithRole(params, 'user');
+  }
+
+  async createUserWithRole(params: CreateUserInput, roleName: string): Promise<UserRecord> {
     const user = await this.usersRepository.create(params);
-    await this.usersRepository.assignRoleToUser(user.id, 'user');
+    await this.usersRepository.assignRoleToUser(user.id, roleName);
     return user;
   }
 

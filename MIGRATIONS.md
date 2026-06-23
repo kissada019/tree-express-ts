@@ -14,6 +14,14 @@
 6. `src/migrations/006_create_cart_items_table.sql`
 7. `src/migrations/007_create_orders_tables.sql`
 8. `src/migrations/010_add_payment_method_to_orders.sql`
+9. `src/migrations/012_add_sales_channel_to_orders.sql`
+10. `src/migrations/013_add_orders_status_check.sql`
+11. `src/migrations/014_add_address_fields_to_users.sql`
+12. `src/migrations/015_add_subdistrict_to_users.sql`
+13. `src/migrations/016_add_payment_slip_to_orders.sql`
+14. `src/migrations/017_add_payment_review_order_status.sql`
+15. `src/migrations/018_add_fulfillment_method_to_orders.sql`
+16. `src/migrations/019_add_pickup_schedule_to_orders.sql`
 
 ---
 
@@ -30,6 +38,14 @@ docker exec -i postgres psql -U myuser -d treedb < "src/migrations/005_add_statu
 docker exec -i postgres psql -U myuser -d treedb < "src/migrations/006_create_cart_items_table.sql"
 docker exec -i postgres psql -U myuser -d treedb < "src/migrations/007_create_orders_tables.sql"
 docker exec -i postgres psql -U myuser -d treedb < "src/migrations/010_add_payment_method_to_orders.sql"
+docker exec -i postgres psql -U myuser -d treedb < "src/migrations/012_add_sales_channel_to_orders.sql"
+docker exec -i postgres psql -U myuser -d treedb < "src/migrations/013_add_orders_status_check.sql"
+docker exec -i postgres psql -U myuser -d treedb < "src/migrations/014_add_address_fields_to_users.sql"
+docker exec -i postgres psql -U myuser -d treedb < "src/migrations/015_add_subdistrict_to_users.sql"
+docker exec -i postgres psql -U myuser -d treedb < "src/migrations/016_add_payment_slip_to_orders.sql"
+docker exec -i postgres psql -U myuser -d treedb < "src/migrations/017_add_payment_review_order_status.sql"
+docker exec -i postgres psql -U myuser -d treedb < "src/migrations/018_add_fulfillment_method_to_orders.sql"
+docker exec -i postgres psql -U myuser -d treedb < "src/migrations/019_add_pickup_schedule_to_orders.sql"
 ```
 
 ---
@@ -94,4 +110,3 @@ docker exec -it postgres psql -U myuser -d treedb -c "\d orders"
   ```bash
   docker compose up -d
   ```
-

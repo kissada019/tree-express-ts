@@ -18,16 +18,34 @@ export class AdminRepository {
         return result.rows[0] ?? null;
     }
 
-    async isUserAdmin(userId: string): Promise<boolean> {
+    async isUserSuperadmin(userId: string): Promise<boolean> {
         const result = await this.db.query(
             `
       SELECT 1
       FROM user_roles ur
       INNER JOIN roles r ON r.id = ur.role_id
-      WHERE ur.user_id = $1 AND r.name = 'admin'
+      WHERE ur.user_id = $1 AND r.name = 'superadmin'
       LIMIT 1
       `,
             [userId]
+        );
+        return result.rows.length > 0;
+    }
+
+    async hasAnyRole(userId: string, roleNames: string[]): Promise<boolean> {
+        if (roleNames.length === 0) {
+            return false;
+        }
+
+        const result = await this.db.query(
+            `
+      SELECT 1
+      FROM user_roles ur
+      INNER JOIN roles r ON r.id = ur.role_id
+      WHERE ur.user_id = $1 AND r.name = ANY($2::text[])
+      LIMIT 1
+      `,
+            [userId, roleNames]
         );
         return result.rows.length > 0;
     }

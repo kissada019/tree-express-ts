@@ -13,12 +13,16 @@ export class AdminService {
     return this.adminRepository.findUserById(id);
   }
 
-  isUserAdmin(userId: string): Promise<boolean> {
-    return this.adminRepository.isUserAdmin(userId);
+  isUserSuperadmin(userId: string): Promise<boolean> {
+    return this.adminRepository.isUserSuperadmin(userId);
   }
 
-  assignAdminRole(userId: string): Promise<boolean> {
-    return this.adminRepository.assignRoleToUser(userId, 'admin');
+  isUserAdminOrSuperadmin(userId: string): Promise<boolean> {
+    return this.adminRepository.hasAnyRole(userId, ['admin', 'superadmin']);
+  }
+
+  assignSuperadminRole(userId: string): Promise<boolean> {
+    return this.adminRepository.assignRoleToUser(userId, 'superadmin');
   }
 }
 

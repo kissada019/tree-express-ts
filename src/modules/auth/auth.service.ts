@@ -50,7 +50,8 @@ export class AuthService {
     }
     const token = jwt.sign(payload, secret, signOptions);
 
-    const role = await this.authRepository.getRoleByUserId(user.id);
+    const roles = await this.authRepository.getRolesByUserId(user.id);
+    const role = roles[0] ?? 'user';
 
     return {
       token,
@@ -59,6 +60,7 @@ export class AuthService {
         email: user.email,
         username: user.username,
         role,
+        roles,
       },
       expiresIn,
     };

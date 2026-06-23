@@ -9,6 +9,10 @@ import {
   getTreeByIdController,
   listTreesController,
   updateTreeByIdController,
+  addTreeImagesController,
+  getTreeImagesController,
+  deleteTreeImageController,
+  updateImagePrimaryController,
 } from '@src/modules/trees/trees.controller';
 
 const router = Router();
@@ -34,10 +38,17 @@ const upload = multer({
   },
 });
 
+// Main tree routes
 router.post('/', upload.any(), createTreeController);
 router.get('/', listTreesController);
 router.get('/:id', getTreeByIdController);
 router.put('/:id', upload.any(), updateTreeByIdController);
 router.delete('/:id', deleteTreeByIdController);
+
+// Tree images routes
+router.post('/:id/images', upload.any(), addTreeImagesController);
+router.get('/:id/images', getTreeImagesController);
+router.delete('/images/:id', deleteTreeImageController);
+router.patch('/:treeId/images/:imageId/primary', updateImagePrimaryController);
 
 export default router;

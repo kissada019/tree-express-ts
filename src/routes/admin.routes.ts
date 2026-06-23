@@ -1,17 +1,19 @@
 import { Router } from 'express';
 import { authenticateJwt } from '@src/middlewares/auth.middleware';
-import { requireAdmin } from '@src/middlewares/admin.middleware';
+import { requireSuperadmin } from '@src/middlewares/admin.middleware';
 import {
-  assignAdminRoleController,
+  assignSuperadminRoleController,
+  createAdminUserController,
   listUsersAdminController,
 } from '@src/modules/admin/admin.controller';
 
 const router = Router({ mergeParams: true });
 
 router.use(authenticateJwt);
-router.use(requireAdmin);
+router.use(requireSuperadmin);
 
 router.get('/users', listUsersAdminController);
-router.post('/users/:id/roles/admin', assignAdminRoleController);
+router.post('/users/admin', createAdminUserController);
+router.post('/users/:id/roles/superadmin', assignSuperadminRoleController);
 
 export default router;

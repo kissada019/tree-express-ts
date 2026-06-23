@@ -3,6 +3,7 @@ import { TreesRepository } from '@src/modules/trees/trees.repository';
 import {
   CreateOrderItemInput,
   OrderRecord,
+  OrderStatus,
   OrdersRepository,
   OrderWithItems,
 } from './orders.repository';
@@ -20,6 +21,10 @@ export class OrdersService {
     discountAmount: number,
     finalTotal: number,
     paymentMethod: string,
+    salesChannel: string,
+    fulfillmentMethod: string,
+    pickupDate: string | null,
+    pickupTime: string | null,
     note?: string
   ): Promise<OrderWithItems> {
     const orderItems: CreateOrderItemInput[] = [];
@@ -46,6 +51,9 @@ export class OrdersService {
       });
     }
 
+    const status: OrderStatus =
+      salesChannel === 'online' ? 'pending_payment' : 'completed';
+
     const order = await this.ordersRepository.createOrder(
       userId,
       orderItems,
@@ -53,6 +61,11 @@ export class OrdersService {
       discountAmount,
       finalTotal,
       paymentMethod,
+      salesChannel,
+      fulfillmentMethod,
+      pickupDate,
+      pickupTime,
+      status,
       note
     );
 
@@ -73,12 +86,32 @@ export class OrdersService {
     return this.ordersRepository.findOrdersByUserId(userId);
   }
 
+  getMyOrdersWithItems(userId: string): Promise<OrderWithItems[]> {
+    return this.ordersRepository.findOrdersWithItemsByUserId(userId);
+  }
+
   getOrderById(orderId: string): Promise<OrderWithItems | null> {
     return this.ordersRepository.findOrderById(orderId);
   }
 
   getAllOrders(): Promise<OrderRecord[]> {
     return this.ordersRepository.findAllOrders();
+  }
+
+  getAllOrdersWithItems(): Promise<OrderWithItems[]> {
+    return this.ordersRepository.findAllOrdersWithItems();
+  }
+
+  updateOrderStatus(orderId: string, status: OrderStatus): Promise<OrderRecord | null> {
+    return this.ordersRepository.updateStatus(orderId, status);
+  }
+
+  uploadPaymentSlip(
+    orderId: string,
+    userId: string,
+    paymentSlipUrl: string,
+  ): Promise<OrderRecord | null> {
+    return this.ordersRepository.updatePaymentSlip(orderId, userId, paymentSlipUrl);
   }
 }
 

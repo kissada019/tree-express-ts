@@ -24,6 +24,7 @@ const app = express();
 
 // Middleware
 app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
     ...(process.env.NODE_ENV === 'development' ? {
         contentSecurityPolicy: false
     } : {})
@@ -31,15 +32,38 @@ app.use(helmet({
 
 app.set('trust proxy', 1);
 
-app.use(rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100
-}));
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map((origin) => origin.trim()).filter(Boolean) || [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:3004',
+    'http://localhost:3005',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
+    'http://127.0.0.1:3002',
+    'http://127.0.0.1:3003',
+    'http://127.0.0.1:3004',
+    'http://127.0.0.1:3005',
+];
 
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+            return;
+        }
+
+        callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true
+}));
+
+app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: process.env.NODE_ENV === 'production' ? 100 : 1000,
+    skip: (req: Request) => req.method === 'OPTIONS'
 }));
 
 // Body parsers
@@ -54,13 +78,13 @@ app.use('/uploads', express.static(uploadsDir));
 
 // Routes
 // app.use('/v1', v1Routes);
-app.use('/admin', adminRoutes);
-app.use('/auth', authRoutes);
-app.use('/cart', cartRoutes);
-app.use('/dashboard', dashboardRoutes);
-app.use('/orders', ordersRoutes);
-app.use('/trees', treesRoutes);
-app.use('/users', usersRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/trees', treesRoutes);
+app.use('/api/users', usersRoutes);
 // app.use('/webhook', webhookRoutes);
 
 // Health check route
