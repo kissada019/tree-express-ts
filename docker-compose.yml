@@ -1,15 +1,9 @@
 services:
-  postgres:
-    image: postgres:15
+  app:
+    build: .
+    container_name: tree-system-app
     restart: always
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5433:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata:
+      - "4000:4000"
+    env_file:
+      - .env
