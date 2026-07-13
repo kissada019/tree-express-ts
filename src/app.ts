@@ -44,7 +44,6 @@ app.use(rateLimit({
     max: process.env.NODE_ENV === 'production' ? 100 : 1000,
     skip: (req: Request) => req.method === 'OPTIONS'
 }));
-app.options("*", cors());
 
 // Body parsers
 app.use(express.json());
