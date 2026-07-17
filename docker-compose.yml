@@ -7,3 +7,15 @@ services:
       - "4000:4000"
     env_file:
       - .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      PORT: 4000
+    networks:
+      - default
+      - database
+
+networks:
+  database:
+    external: true
+    name: tree-system_default
